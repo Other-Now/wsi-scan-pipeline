@@ -1,0 +1,14 @@
+build/
+build-*/
+third_party/
+data/
+out/
+__pycache__/
+*.pyc
+*.obj
+*.exe
+*.lib
+*.pdb
+*.tif
+*.ppm
+*.pgm

@@ -1,0 +1,13 @@
+{
+  "slide": {"path": "data/slide.ppm", "width": 6144, "height": 4096},
+  "segmentation": {"otsu_threshold": 208, "tissue_fraction": 0.2075, "ms": 73.2760},
+  "plan": {"cols": 11, "rows": 7, "total_fovs": 77, "acquired": 43, "skipped_fraction": 0.4416, "fov": 512, "overlap": 64},
+  "flatfield": {"corner_centre_before": 0.6560, "corner_centre_after": 1.0000},
+  "autofocus": {"metric": "brenner", "map_enabled": true, "map_mode": "plane+local", "verify_span_um": 2.0000, "tiles": 43, "full_sweeps": 19, "from_map": 24, "pct_full_sweep": 44.1860, "frames": 436, "frames_per_tile": 10.1395, "search_ms": 4451.9955, "search_ms_per_tile": 103.5348, "focus_error_um_mean": 0.2969, "focus_error_um_p95": 0.6008, "focus_error_um_mean_mapped": 0.2867, "focus_error_um_mean_swept": 0.3098, "map_points": 19, "map_residual_um": 1.4561},
+  "instrument_time_ms": {"stage": 6529.7548, "exposure": 6744.0000, "total": 13273.7548, "exposures": 562},
+  "registration": {"patch": 64, "pairs": 65, "error_px_mean": 0.0100, "error_px_median": 0.0054, "error_px_p95": 0.0411, "pairs_over_1px": 0, "weak_links_rejected": 0, "peak_median": 142.0035, "peak_p5": 30.9939, "ms": 70.8459, "ms_per_pair": 1.0899},
+  "mosaic": {"width": 5008, "height": 3216, "registration_components": 2, "placement_error_px_mean": 0.0000, "placement_error_px_max": 0.0000, "ms": 145.0826},
+  "pyramid": {"levels": 6, "tile": 256, "bytes": 70586080, "resample_ms": 34.5481, "resample_gbs": 2.3286, "write_ms": 40.0943, "dims": [[5008, 3216], [2504, 1608], [1252, 804], [626, 402], [313, 201], [156, 100]]},
+  "quality": {"status": "ok", "patches": 688, "tiles_per_s": 861.9327, "infer_ms": 798.2062, "threads": 4, "flagged_fovs": 5, "counts": {"background": 242, "blurred": 31, "bubble": 24, "folded": 18, "sharp": 373}, "fold_detected": 18, "fold_truth": 19, "bubble_detected": 4, "bubble_truth": 4, "rescanned": 5, "rescan_fixed": 0},
+  "wall_ms": {"total": 9747.6980, "acquire": 6141.5445, "registration": 70.8459, "mosaic": 145.0826}
+}

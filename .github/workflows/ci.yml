@@ -1,0 +1,91 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: build
+        run: cmake --build build --config Release --parallel
+
+      - name: unit tests
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: end-to-end scan
+        shell: bash
+        run: |
+          BIN=build; [ -x build/Release/wsi_scan.exe ] && BIN=build/Release
+          EXT=""; [ -f "$BIN/wsi_scan.exe" ] && EXT=".exe"
+          mkdir -p data out
+          "$BIN/wsi_makeslide$EXT" --width 3072 --height 2048 --out data/slide.ppm \
+            --truth data/slide_truth.json
+          "$BIN/wsi_scan$EXT" --slide data/slide.ppm --truth data/slide_truth.json --out out
+          python - <<'PY'
+          import json, sys
+          r = json.load(open("out/report.json"))
+          # The scan is deterministic, so these are assertions, not observations.
+          assert r["plan"]["acquired"] > 0, "nothing was acquired"
+          assert r["registration"]["error_px_mean"] < 1.0, r["registration"]
+          assert r["mosaic"]["placement_error_px_mean"] < 1.0, r["mosaic"]
+          assert r["autofocus"]["focus_error_um_mean"] < 1.0, r["autofocus"]
+          assert r["pyramid"]["levels"] >= 3, r["pyramid"]
+          print("e2e ok:", json.dumps(r["registration"]))
+          PY
+
+      - name: tiled pyramid is readable by third-party tools
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          python -m pip install --quiet tifffile numpy openslide-python openslide-bin
+          python - <<'PY'
+          import tifffile, openslide
+          with tifffile.TiffFile("out/scan.tif") as tf:
+              assert all(p.is_tiled for p in tf.pages), "a level is not tiled"
+              print("tifffile:", [p.shape for p in tf.pages])
+          s = openslide.OpenSlide("out/scan.tif")
+          assert s.level_count >= 3
+          print("openslide:", s.detect_format("out/scan.tif"), s.level_count, s.dimensions)
+          PY
+
+  onnx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: fetch onnxruntime
+        id: ort
+        run: echo "root=$(scripts/get_onnxruntime.sh 1.22.0)" >> "$GITHUB_OUTPUT"
+
+      - name: build with the tile-quality classifier
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
+            -DWSI_WITH_ONNX=ON -DORT_ROOT=${{ steps.ort.outputs.root }}
+          cmake --build build --parallel
+
+      - name: scan with in-loop quality control
+        run: |
+          mkdir -p data out
+          build/wsi_makeslide --width 3072 --height 2048 --out data/slide.ppm \
+            --truth data/slide_truth.json
+          LD_LIBRARY_PATH=${{ steps.ort.outputs.root }}/lib \
+            build/wsi_scan --slide data/slide.ppm --truth data/slide_truth.json --out out \
+              --model models/tile_quality.onnx --threads 2
+          python - <<'PY'
+          import json
+          q = json.load(open("out/report.json"))["quality"]
+          assert q["status"] == "ok", q
+          assert q["patches"] > 0 and q["tiles_per_s"] > 0, q
+          print("quality ok:", json.dumps(q))
+          PY

@@ -1,0 +1,9 @@
+downsample 2x   4096x4096x3
+  generic NxN     106.0 ms   0.59 GB/s
+  specialised      16.1 ms   3.91 GB/s   (6.60x)
+focus metrics   192x192 ROI, 200 iterations (sink 0)
+  brenner         0.038 ms/frame   969.6 MPix/s
+  var-laplacian   0.057 ms/frame   648.6 MPix/s
+phase corr       64x64          0.397 ms/pair
+phase corr      128x128         1.644 ms/pair
+phase corr      256x256         7.376 ms/pair
