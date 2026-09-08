@@ -66,7 +66,7 @@ jobs:
 
       - name: fetch onnxruntime
         id: ort
-        run: echo "root=$(scripts/get_onnxruntime.sh 1.22.0)" >> "$GITHUB_OUTPUT"
+        run: echo "root=$(scripts/get_onnxruntime.sh 1.22.0 | tail -1)" >> "$GITHUB_OUTPUT"
 
       - name: build with the tile-quality classifier
         run: |

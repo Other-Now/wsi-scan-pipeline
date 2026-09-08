@@ -16,8 +16,10 @@ esac
 
 URL="https://github.com/microsoft/onnxruntime/releases/download/v${VERSION}/${PKG}.${EXT}"
 
+# Progress goes to stderr: stdout is only ever the ORT_ROOT path, so callers
+# can do ORT=$(scripts/get_onnxruntime.sh) and get a usable value.
 if [ ! -d "$DEST/$PKG" ]; then
-  echo "fetching $URL"
+  echo "fetching $URL" >&2
   curl -sSL -o "$DEST/$PKG.$EXT" "$URL"
   if [ "$EXT" = "zip" ]; then
     unzip -q -o "$DEST/$PKG.$EXT" -d "$DEST"
